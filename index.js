@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(cors());
 
 const GOOGLE_SHEET_WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbxitm6rWGKmJ69JIivq_sIHiTtr08q8wJWUK_E0Trk7qT78tUoCItolmTPAGGBqV8wM/exec";
+  "https://script.google.com/macros/s/AKfycbwDuCj4zcPgvgqHPBLdUjSna21lliK85N2mo90qfZgwnVNfNioq2plyTsgmmDSZ8EW6NQ/exec";
 
 const EDUZILLA_API_URL = "https://erp.eduzilla.in/api/leads/add_new_lead";
 

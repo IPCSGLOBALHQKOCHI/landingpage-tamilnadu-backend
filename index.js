@@ -4,6 +4,7 @@ const cors = require("cors");
 const axios = require("axios");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
+const request = require("request");
 
 const PORT = process.env.PORT || 5000;
 
@@ -11,27 +12,22 @@ app.use(express.json());
 app.use(cors());
 
 const GOOGLE_SHEET_WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbwDuCj4zcPgvgqHPBLdUjSna21lliK85N2mo90qfZgwnVNfNioq2plyTsgmmDSZ8EW6NQ/exec";
+  "https://script.google.com/macros/s/AKfycbxitm6rWGKmJ69JIivq_sIHiTtr08q8wJWUK_E0Trk7qT78tUoCItolmTPAGGBqV8wM/exec";
 
-// const EDUZILLA_API_URL = "https://erp.eduzilla.in/api/leads/add_new_lead";
+const EDUZILLA_API_URL = "https://erp.eduzilla.in/api/leads/add_new_lead";
 
-//   const instCode= "IPCS_Gbl08"
-//   const urlSecurityCode= "ipcsglobal"
+const instCode = "IPCS_Gbl08";
+const urlSecurityCode = "ipcsglobal";
 
 const branchMapping = {
-  CHN: "Kochi",
-  CLT: "Calicut",
-  TVM: "Trivandrum",
-  ATL: "Attingal",
-  KLM: "Kollam",
-  KNR: "Kannur",
-  TCR: "Thrissur",
-  PER: "Perinthalmanna",
-  KTM: "Kottayam",
-  PTM: "Pathanamthitta",
-  PKD: "Palakkad",
+  CNI: "Chennai",
+  CBE: "Coimbatore",
+  MDI: "Madurai",
+  SAL: "Salem",
+  TBM: "Tambaram",
+  TEN: "Tirunelveli",
+  TCY: "Trichy",
 };
-
 
 const courseMapping = {
   DM: "Ai Integrated Digital Marketing",
@@ -120,21 +116,41 @@ app.post("/api/submitform", async (req, res) => {
     console.log("Data added to Google Sheet");
 
     // Send data to Eduzilla API
-    // const eduZillaResponse = await axios.post(EDUZILLA_API_URL, {
-    //   inst_code: instCode,
-    //   url_security_code: urlSecurityCode,
-    //   fname: name,
-    //   email: email || "N/A",
-    //   mobile: mobileNumber,
-    //   branch: location,
-    //   course: course,
-    // });
 
-    // if (eduZillaResponse.data !== 0) {
-    //   console.error("Eduzilla Error:", eduZillaResponse.data);
-    //   throw new Error("Failed to add lead to Eduzilla");
-    // }
-    // console.log("Lead added to Eduzilla");
+    const options = {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      url: EDUZILLA_API_URL,
+      form: {
+        inst_code: instCode,
+        url_security_code: urlSecurityCode,
+        fname: name,
+        email: email || "N/A",
+        mobile: mobileNumber,
+        branch: location,
+        course: course,
+      },
+    };
+
+    console.log("Request data:", {
+      instCode,
+      urlSecurityCode,
+      fname: name,
+      email,
+      mobile: mobileNumber,
+      branch: location,
+      course,
+    });
+
+    request.post(options, function (error, response) {
+      if (error) {
+        console.error("Eduzilla Error:", error);
+        throw new Error("Failed to add lead to Eduzilla");
+      }
+      if (response.statusCode !== 200) {
+        throw new Error("Failed to add lead to Eduzilla");
+      }
+      console.log("Lead added to Eduzilla");
+    });
 
     // All processes succeeded
     res.status(200).json({
@@ -146,7 +162,6 @@ app.post("/api/submitform", async (req, res) => {
     res.status(500).json({ error: "Failed to process the request" });
   }
 });
-
 
 app.get("/", (req, res) => {
   res.send("Server is running");
